@@ -1,31 +1,19 @@
 package org.igniterealtime.openfire.plugin.presencesync;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import org.apache.tomcat.InstanceManager;
-import org.apache.tomcat.SimpleInstanceManager;
-import org.dom4j.Element;
 import org.dom4j.Node;
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.jivesoftware.admin.AuthCheckFilter;
-import org.jivesoftware.openfire.IQRouter;
-import org.jivesoftware.openfire.PresenceRouter;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
-import org.jivesoftware.openfire.http.HttpBindManager;
 import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.interceptor.PacketInterceptor;
 import org.jivesoftware.openfire.interceptor.PacketRejectedException;
+import org.jivesoftware.openfire.roster.Roster;
 import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.Session;
+import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.jivesoftware.util.SystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +23,7 @@ import org.xmpp.packet.Presence.Show;
 
 
 /**
- * An Openfire plugin that integrates XEP-0418 and DNS over HTTPS.
+ * An Openfire plugin that syncs presence between ressources.
  *
  * @author 
  */
@@ -80,6 +68,14 @@ public class PresenceSyncPlugin implements Plugin, PacketInterceptor
                 Node show = p.getElement().selectSingleNode("//*[local-name()='show']"); //ohne = online, sonst: chat, away, xa, dnd
                 Node status = p.getElement().selectSingleNode("//*[local-name()='status']");
 
+                Roster r = null;
+
+                try {
+                    r = XMPPServer.getInstance().getUserManager().getUser(username).getRoster();
+                } catch (UserNotFoundException e) {
+                    Log.error("User {} not found while sync presence.",username);
+                }
+
                 for (ClientSession itm : list)
                 {
                     if (itm!=arg1)
@@ -121,6 +117,8 @@ public class PresenceSyncPlugin implements Plugin, PacketInterceptor
                         else {
                             itm.getPresence().setStatus(null);
                         }
+
+                        r.broadcastPresence(itm.getPresence());
                     }
                 }
             }
