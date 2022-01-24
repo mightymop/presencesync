@@ -78,61 +78,47 @@ public class PresenceSyncPlugin implements Plugin, PacketInterceptor
                 Collection<ClientSession> list = XMPPServer.getInstance().getSessionManager().getSessions(username);
 
                 Node show = p.getElement().selectSingleNode("//*[local-name()='show']"); //ohne = online, sonst: chat, away, xa, dnd
-                if (show!=null&&show.getText()!=null&&show.getText().trim().length()>0)
+                Node status = p.getElement().selectSingleNode("//*[local-name()='status']");
+
+                for (ClientSession itm : list)
                 {
-                    String sshow = show.getText().trim().toLowerCase();
-                    for (ClientSession itm : list)
+                    if (itm!=arg1)
                     {
-                        if (itm!=arg1)
+                        if (show!=null&&show.getText()!=null&&show.getText().trim().length()>0)
                         {
-                            if (sshow.equals("away"))
+                            String sshow = show.getText().trim().toLowerCase();
+
+                            if (itm!=arg1)
                             {
-                                itm.getPresence().setShow(Show.away);
-                            }
-                            else
-                                if (sshow.equals("xa"))
+                                if (sshow.equals("away"))
                                 {
-                                    itm.getPresence().setShow(Show.xa);
+                                    itm.getPresence().setShow(Show.away);
                                 }
                                 else
-                                    if (sshow.equals("chat"))
+                                    if (sshow.equals("xa"))
                                     {
-                                        itm.getPresence().setShow(Show.chat);
+                                        itm.getPresence().setShow(Show.xa);
                                     }
                                     else
-                                        if (sshow.equals("dnd"))
+                                        if (sshow.equals("chat"))
                                         {
-                                            itm.getPresence().setShow(Show.dnd);
+                                            itm.getPresence().setShow(Show.chat);
                                         }
+                                        else
+                                            if (sshow.equals("dnd"))
+                                            {
+                                                itm.getPresence().setShow(Show.dnd);
+                                            }
+                            }
                         }
-                    }
-                }
-                else {
-                    for (ClientSession itm : list)
-                    {
-                        if (itm!=arg1)
-                        {
+                        else {
                             itm.getPresence().setShow(null);
                         }
-                    }
-                }
-
-                final Node status = p.getElement().selectSingleNode("//*[local-name()='status']");
-                if (status!=null&&status.getText()!=null&&status.getText().trim().length()>0)
-                {
-                    for (ClientSession itm : list)
-                    {
-                        if (itm!=arg1)
+                        if (status!=null&&status.getText()!=null&&status.getText().trim().length()>0)
                         {
                             itm.getPresence().setStatus(status.getText().trim());
                         }
-                    }
-                }
-                else {
-                    for (ClientSession itm : list)
-                    {
-                        if (itm!=arg1)
-                        {
+                        else {
                             itm.getPresence().setStatus(null);
                         }
                     }

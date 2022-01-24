@@ -5,11 +5,9 @@
     <description>${project.description}</description>
     <author>mightymop</author>
     <version>${project.version}</version>
-    <date>10/18/2021</date>
+    <date>01/25/2022</date>
     <minServerVersion>4.4.0</minServerVersion>
     <minJavaVersion>1.8</minJavaVersion>
-    <databaseKey>presencesync</databaseKey>
-    <databaseVersion>1</databaseVersion>
     <adminconsole>
         <tab id="tab-server">
             <sidebar id="sidebar-server-settings">
